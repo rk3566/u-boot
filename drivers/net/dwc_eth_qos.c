@@ -1845,15 +1845,16 @@ static int eqos_probe_resources_stm32(struct udevice *dev)
 
 	eqos->max_speed = dev_read_u32_default(dev, "max-speed", 0);
 
-	ret = clk_get_by_name(dev, "stmmaceth", &eqos->clk_master_bus);
-	if (ret) {
-		pr_err("clk_get_by_name(master_bus) failed: %d", ret);
-		return ret;
-	}
-
 	ret = clk_get_by_name(dev, "mac-clk-rx", &eqos->clk_rx);
 	if (ret)
 		pr_warn("clk_get_by_name(rx) failed: %d", ret);
+
+
+	ret = clk_get_by_name(dev, "stmmaceth", &eqos->clk_master_bus);
+	if (ret) {
+		pr_err("clk_get_by_name(master_bus) failed: %d", ret);
+//		return ret;
+	}
 
 	ret = clk_get_by_name(dev, "mac-clk-tx", &eqos->clk_tx);
 	if (ret)

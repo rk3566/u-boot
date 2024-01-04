@@ -1,0 +1,13 @@
+#!/bin/bash
+
+export ARCH=arm
+export CROSS_COMPILE=/projects/compilers/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-
+OUT=../out
+TOOLPATH=../rkbin/tools
+BOARD=$1
+
+PATH=$PATH:$TOOLPATH
+
+#make rockchip_linux_defconfig
+make -j16 envtools
+

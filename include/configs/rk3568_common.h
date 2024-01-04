@@ -92,9 +92,9 @@
 
 #undef RKIMG_BOOTCOMMAND
 #define RKIMG_BOOTCOMMAND		\
-	"run distro_bootcmd;"		\
-	"boot_fit;"			\
-	"boot_android ${devtype} ${devnum};"
+	"ext2load mmc 0:1 a100000 /boot/rk3566-radxa-cm3-rpi-cm4-io.dtb;"		\
+	"ext2load mmc 0:1 280000 /boot/Image;"			\
+	"booti 280000 - a100000;"
 #endif
 
 /* rockchip ohci host driver */

@@ -12,5 +12,13 @@
 / {
 	model = "Radxa CM3 RPI CM4 IO";
 	compatible = "radxa,radxa-cm3-rpi-cm4-io", "rockchip,rk3566";
+ aliases {
+                ethernet1 = &gmac1;
+        };
+
+};
+
+&gmac1 {
+        status = "okay";
 };
 

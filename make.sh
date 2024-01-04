@@ -13,7 +13,8 @@ CMD_ARGS=$1
 ########################################### User can modify #############################################
 RKBIN_TOOLS=../rkbin/tools
 CROSS_COMPILE_ARM32=../prebuilts/gcc/linux-x86/arm/gcc-linaro-6.3.1-2017.05-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-
-CROSS_COMPILE_ARM64=../prebuilts/gcc/linux-x86/aarch64/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
+#CROSS_COMPILE_ARM64=../prebuilts/gcc/linux-x86/aarch64/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
+CROSS_COMPILE_ARM64=/usr/local/gcc-linaro-7.3.1-2018.05-x86_64_aarch64-linux-gnu/bin/aarch64-linux-gnu-
 ########################################### User not touch #############################################
 # Declare global INI file searching index name for every chip, update in select_chip_info()
 RKCHIP=
@@ -638,6 +639,7 @@ function pack_loader_image()
 {
 	rm *_loader_*.bin -f
 	cd ${RKBIN}
+	echo xx:${SCRIPT_LOADER} --ini ${INI_LOADER}
 	${SCRIPT_LOADER} --ini ${INI_LOADER}
 	cd -
 	if [ -f ${RKBIN}/*_loader_*.bin ]; then
@@ -677,6 +679,7 @@ function pack_fit_image()
 	fi
 
 	rm uboot.img trust*.img -rf
+	echo xxxxxxxxxxxxxx ${SCRIPT_FIT} ${ARG_LIST_FIT} --chip ${RKCHIP_LABEL}
 	${SCRIPT_FIT} ${ARG_LIST_FIT} --chip ${RKCHIP_LABEL}
 
 	rm ${REP_DIR} -rf
@@ -697,12 +700,19 @@ function clean_files()
 function pack_images()
 {
 	if [ "${ARG_RAW_COMPILE}" != "y" ]; then
+		echo 31
 		if [ "${PLAT_TYPE}" == "FIT" ]; then
+		echo 32
+			echo pack_fit_image ${ARG_LIST_FIT}
 			pack_fit_image ${ARG_LIST_FIT}
 		else
+		echo 33
 			pack_uboot_image
+		echo 34
 			pack_trust_image
+		echo 35
 			pack_loader_image
+		echo 36
 		fi
 	fi
 }
@@ -725,8 +735,13 @@ fixup_platform_configure
 select_ini_file
 handle_args_late
 sub_commands
+echo 1
 clean_files
+echo 2
 make PYTHON=python2 CROSS_COMPILE=${TOOLCHAIN} all --jobs=${JOB}
+echo 3
 pack_images
+echo 4
 finish
+echo 5
 date

@@ -366,6 +366,20 @@ static void cmdline_handle(void)
 			env_update("bootargs", "usbfwupdate");
 	}
 }
+#define MODEL_SS_200	1180
+#define REVISION_0	511
+int adc(int ch)
+{
+	*((volatile int *)0xfe720008) = 0;
+	*((volatile int *)0xfe720008) = ch;
+	*((volatile int *)0xfe720008) = (0x8 | ch); 
+//	printf("adc ch:%x\n", (0x8 |ch));
+	udelay(3);	// 아래처럼 상태를 읽는것보단 delay가 더나음 smiles77
+//	while( *((volatile int *)0xfe720004) == 1)
+//		printf("a\n");
+
+	return *((volatile int *)0xfe720000);
+}
 
 int board_late_init(void)
 {
@@ -393,6 +407,48 @@ int board_late_init(void)
 #ifdef CONFIG_AMP
 	amp_cpus_on();
 #endif
+
+	// smiles77
+	int adc_model = adc(2) * 100 / 1024 * 18;
+	int adc_revision = adc(0) * 100 / 1024 * 18;
+	//printf("adc %d %d\n", adc_model, adc_revision);
+
+	char *old_model= env_get("model");
+	int old_revision = env_get_ulong("revision",10, 10);
+
+	//printf("env %s %d\n", old_model, old_revision);
+
+	char *new_model;
+	int new_revision = 0;
+	int needSave = 0;
+	
+	if(adc_model > MODEL_SS_200 - 100 && adc_model < MODEL_SS_200+100) {	// SS-200
+		new_model = "SS-200";
+	}
+
+	if(strcmp(new_model, old_model)){
+		needSave = 1;
+		printf("Model is changed. %s -> %s\n", old_model, new_model);
+	}
+
+	if(adc_revision > REVISION_0 - 100 && adc_revision < REVISION_0+100) {	// SS-200
+		needSave = 1;
+		new_revision = 0;
+	}
+
+	if(new_revision != old_revision){
+		needSave = 1;
+		printf("Revision is changed. %d -> %d\n", old_revision, new_revision);
+	}
+
+	if(needSave > 0){
+		env_set("model", new_model);
+		env_set_ulong("revision", new_revision);
+		run_command("saveenv", CMD_FLAG_ENV);
+	}
+
+	printf("Model:%s Revision:%d\n", new_model, new_revision);
+
 	return rk_board_late_init();
 }
 
@@ -442,10 +498,15 @@ static void board_mtd_blk_map_partitions(void)
 }
 #endif
 
+
+
 int board_init(void)
 {
 	board_debug_init();
 
+	*((volatile int *)0xfdc600b0) = 0x0c000400;	// smiles77 usb power ctrl pull up 하단
+	*((volatile int *)0xfdc600b4) = 0xc0004000;	// smiles77 usb power ctrl pull up 상단
+	
 #ifdef DEBUG
 	soc_clk_dump();
 #endif
@@ -681,7 +742,6 @@ int board_init_f_boot_flags(void)
 #if defined(CONFIG_DISABLE_CONSOLE)
 	boot_flags |= GD_FLG_DISABLE_CONSOLE;
 #endif
-
 	return boot_flags;
 }
 
@@ -812,6 +872,8 @@ int bootm_board_start(void)
 	/* sysmem */
 	hotkey_run(HK_SYSMEM);
 	sysmem_overflow_check();
+
+	
 
 	return 0;
 }

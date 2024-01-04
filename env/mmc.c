@@ -125,7 +125,20 @@ __weak int mmc_get_env_addr(struct mmc *mmc, int copy, u32 *env_addr)
 
 __weak int mmc_get_env_dev(void)
 {
-	return CONFIG_SYS_MMC_ENV_DEV;
+	// smiles77 어디서 부팅한지 알수 있음
+	char *ch = env_get("bootnum");
+	if(ch == NULL){
+	printf("xxxbootdev ----------------------------------------------------> null\n");
+		ch = env_get("devnum");
+	}
+	printf("xxxbootdev ----------------------------------------------------> %c\n", *ch);
+	if(*ch == '0'){
+		return 0;
+	}else{
+		return 1;
+	}
+
+	//return CONFIG_SYS_MMC_ENV_DEV;
 }
 
 #ifdef CONFIG_SYS_MMC_ENV_PART
@@ -330,6 +343,7 @@ static int env_mmc_load(void)
 	struct mmc *mmc;
 	u32 offset;
 	int ret;
+	//int dev = mmc_get_env_dev();	// smiles77
 	int dev = mmc_get_env_dev();
 	const char *errmsg;
 

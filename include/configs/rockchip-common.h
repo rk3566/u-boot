@@ -107,7 +107,10 @@
 	"name=trust,size=4M,uuid=${uuid_gpt_atf};" \
 	"name=boot,size=112M,bootable,uuid=${uuid_gpt_boot};" \
 	"name=rootfs,size=-,uuid="ROOT_UUID
-
+#if 1	/* smiles77 */
+#define PARTS_RKIMG 
+#define RKIMG_DET_BOOTDEV 
+#else
 #define PARTS_RKIMG \
 	"uuid_disk=${uuid_gpt_disk};" \
 	"name=uboot,start=8MB,size=4MB,uuid=${uuid_gpt_loader2};" \
@@ -150,6 +153,7 @@
 	"else" \
 		"setenv devtype ramdisk; setenv devnum 0;" \
 	"fi; \0"
+#endif
 
 #if defined(CONFIG_AVB_VBMETA_PUBLIC_KEY_VALIDATE)
 #define RKIMG_BOOTCOMMAND			\
@@ -158,7 +162,8 @@
 #define RKIMG_BOOTCOMMAND			\
 	"boot_android ${devtype} ${devnum};"	\
 	"bootrkp;"				\
-	"run distro_bootcmd;"
+	"run distro_bootcmd;" \
+	"appp;"
 #endif
 
 #endif /* CONFIG_SPL_BUILD */

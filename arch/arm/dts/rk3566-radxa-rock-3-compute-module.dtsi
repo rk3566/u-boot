@@ -364,7 +364,9 @@
 	pmic {
 		pmic_int: pmic_int {
 			rockchip,pins =
-				<0 RK_PA3 RK_FUNC_GPIO &pcfg_pull_up>;
+				<0 RK_PA3 RK_FUNC_GPIO &pcfg_pull_up>,
+				<4 RK_PA5 RK_FUNC_GPIO &pcfg_pull_up>,// usb 상단 PWR
+                                <4 RK_PB7 RK_FUNC_GPIO &pcfg_pull_up>;// usb 하단 pwr
 		};
 
 		soc_slppin_gpio: soc_slppin_gpio {

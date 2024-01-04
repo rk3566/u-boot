@@ -1031,6 +1031,7 @@ void board_init_f_r(void)
 	gd->timer = NULL;
 #endif
 
+	printf("aaaaaaaaaaaaaaaaaakkk\n");
 	/*
 	 * U-Boot has been copied into SDRAM, the BSS has been cleared etc.
 	 * Transfer execution from Flash to RAM by calculating the address

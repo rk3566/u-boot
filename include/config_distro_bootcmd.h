@@ -330,6 +330,24 @@
 
 #define BOOTENV_DEV(devtypeu, devtypel, instance) \
 	BOOTENV_DEV_##devtypeu(devtypeu, devtypel, instance)
+#if 1
+#define BOOTENV \
+	"eraseenv=" \
+		"mmc erase 1fc0 64\0" \
+	"bootargs=" \
+		"console=ttyFIQ0,1500000n8 rw root=/dev/mmcblk0p2 rootfstype=ext4 init=/sbin/init rootwait\0" \
+	"bootcmd=" \
+		"run initroot;ext2load mmc ${bootnum}:${partition} a100000 /boot/${model}.dtb;ext2load mmc ${bootnum}:${partition} 280000 /boot/Image;booti 280000 - a100000\0" \
+	"bootnum=0\0" \
+	"partition=2\0" \
+	"platform=sunshine\0" \
+	"ubootrev=1\0" \
+	"bootsd=setenv bootnum 1;setenv partition 1;setenv bootargs \"console=ttyFIQ0,1500000n8 rw root=/dev/mmcblk${bootnum}p${partition} rootfstype=ext4 init=/sbin/init rootwait\0" \
+	"bootmmc=setenv bootnum 0;setenv partition 0;setenv bootargs \"console=ttyFIQ0,1500000n8 rw root=/dev/mmcblk${bootnum}p${partition} rootfstype=ext4 init=/sbin/init rootwait\0" \
+	"emmccp=mmc dev 0;mmc read 100000 8000 100000;mmc write 100000 108000 100000\0" \
+	"initroot=if test \"${rootfs}\" = \"init\"; then run emmccp;setenv rootfs;saveenv;fi\0" 
+	
+#else
 #define BOOTENV \
 	BOOTENV_SHARED_HOST \
 	BOOTENV_SHARED_NVME \
@@ -403,6 +421,8 @@
 		"for target in ${boot_targets}; do "                      \
 			"run bootcmd_${target}; "                         \
 		"done\0"
+
+#endif
 
 #ifndef CONFIG_BOOTCOMMAND
 #define CONFIG_BOOTCOMMAND "run distro_bootcmd"

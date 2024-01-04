@@ -205,9 +205,9 @@
 &gmac0 {
 	u-boot,dm-pre-reloc;
 	phy-mode = "rgmii";
-	clock_in_out = "output";
+	clock_in_out = "input";
 
-	snps,reset-gpio = <&gpio2 RK_PD3 GPIO_ACTIVE_LOW>;
+	snps,reset-gpio = <&gpio4 RK_PC2 GPIO_ACTIVE_LOW>;
 	snps,reset-active-low;
 	/* Reset time is 20ms, 100ms for rtl8211f */
 	snps,reset-delays-us = <0 20000 100000>;
@@ -222,8 +222,8 @@
 		     &gmac0_rgmii_clk
 		     &gmac0_rgmii_bus>;
 
-	tx_delay = <0x3c>;
-	rx_delay = <0x2f>;
+	tx_delay = <0x4f>;
+	rx_delay = <0x26>;
 
 	phy-handle = <&rgmii_phy0>;
 	status = "disabled";
@@ -232,9 +232,9 @@
 &gmac1 {
 	u-boot,dm-pre-reloc;
 	phy-mode = "rgmii";
-	clock_in_out = "output";
+	clock_in_out = "input";
 
-	snps,reset-gpio = <&gpio2 RK_PD1 GPIO_ACTIVE_LOW>;
+	snps,reset-gpio = <&gpio4 RK_PC2 GPIO_ACTIVE_LOW>;
 	snps,reset-active-low;
 	/* Reset time is 20ms, 100ms for rtl8211f */
 	snps,reset-delays-us = <0 20000 100000>;
@@ -254,7 +254,7 @@
 	rx_delay = <0x26>;
 
 	phy-handle = <&rgmii_phy1>;
-	status = "disabled";
+	status = "okay";
 };
 
 &gmac0_stmmac_axi_setup {

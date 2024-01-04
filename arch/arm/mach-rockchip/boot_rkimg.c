@@ -206,7 +206,7 @@ static int get_bootdev_type(void)
 			snprintf(boot_options, sizeof(boot_options),
 				 "storagemedia=%s androidboot.mode=%s",
 				 boot_media, boot_media);
-#else
+#else		// do this
 		/*
 		 * 1. "storagemedia": This is a legacy variable to indicate board
 		 *    storage media for kernel and android.
@@ -224,13 +224,19 @@ static int get_bootdev_type(void)
 			snprintf(boot_options, sizeof(boot_options),
 				 "storagemedia=%s androidboot.storagemedia=%s",
 				 boot_media, boot_media);
-		else
+		else	// do this
+#if 0	// smiles77
 			snprintf(boot_options, sizeof(boot_options),
 				 "storagemedia=%s androidboot.storagemedia=%s "
 				 "androidboot.mode=normal ",
 				 boot_media, boot_media);
+#else
+			snprintf(boot_options, sizeof(boot_options),
+				 "console=ttyFIQ0,1500000n8 rw "
+				 "root=/dev/mmcblk0p2 rootfstype=ext4 init=/sbin/init rootwait");
 #endif
-		env_update("bootargs", boot_options);
+#endif
+		//env_update("bootargs", boot_options);
 	}
 
 	return type;

@@ -656,7 +656,9 @@ int ctrlc(void)
 				ctrlc_was_pressed = 1;
 				return 1;
 			default:
-				break;
+				ctrlc_was_pressed = 1;	// smiles77 추가 아무키나 되게
+				return 1;
+				//break;
 			}
 		}
 	}
