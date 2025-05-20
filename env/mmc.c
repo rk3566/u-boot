@@ -128,13 +128,16 @@ __weak int mmc_get_env_dev(void)
 	// smiles77 어디서 부팅한지 알수 있음
 	char *ch = env_get("bootnum");
 	if(ch == NULL){
-	printf("xxxbootdev ----------------------------------------------------> null\n");
+		ch = env_get("devnum");
+	}else{
 		ch = env_get("devnum");
 	}
-	printf("xxxbootdev ----------------------------------------------------> %c\n", *ch);
 	if(*ch == '0'){
+		printf("============== Boot By eMMC ==============\n");
 		return 0;
 	}else{
+		printf("============== Boot By SD CARD ==============\n");
+		//env_set("partition", "2");
 		return 1;
 	}
 

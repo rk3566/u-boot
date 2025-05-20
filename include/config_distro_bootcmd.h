@@ -333,19 +333,24 @@
 #if 1
 #define BOOTENV \
 	"eraseenv=" \
-		"mmc erase 1fc0 64\0" \
+		"mmc dev 0;mmc erase 1fc0 64\0" \
+	"eraseenvsd=" \
+		"mmc dev 1;mmc erase 1fc0 64\0" \
 	"bootargs=" \
 		"console=ttyFIQ0,1500000n8 rw root=/dev/mmcblk0p2 rootfstype=ext4 init=/sbin/init rootwait\0" \
 	"bootcmd=" \
-		"run initroot;ext2load mmc ${bootnum}:${partition} a100000 /boot/${model}.dtb;ext2load mmc ${bootnum}:${partition} 280000 /boot/Image;booti 280000 - a100000\0" \
+		"run initroot;run finddtb;ext2load mmc ${devnum}:${partition} a100000 /boot/${dtbfile}.dtb;ext2load mmc ${devnum}:${partition} 280000 /boot/Image;booti 280000 - a100000\0" \
+	"cpu=rk3566\0" \
 	"bootnum=0\0" \
 	"partition=2\0" \
-	"platform=sunshine\0" \
+	"platform=stardust\0" \
 	"ubootrev=1\0" \
-	"bootsd=setenv bootnum 1;setenv partition 1;setenv bootargs \"console=ttyFIQ0,1500000n8 rw root=/dev/mmcblk${bootnum}p${partition} rootfstype=ext4 init=/sbin/init rootwait\0" \
-	"bootmmc=setenv bootnum 0;setenv partition 0;setenv bootargs \"console=ttyFIQ0,1500000n8 rw root=/dev/mmcblk${bootnum}p${partition} rootfstype=ext4 init=/sbin/init rootwait\0" \
-	"emmccp=mmc dev 0;mmc read 100000 8000 100000;mmc write 100000 108000 100000\0" \
-	"initroot=if test \"${rootfs}\" = \"init\"; then run emmccp;setenv rootfs;saveenv;fi\0" 
+	"bootsd=setenv devnum 1;setenv partition 1;setenv bootargs \"console=ttyFIQ0,1500000n8 rw root=/dev/mmcblk${devnum}p${partition} rootfstype=ext4 init=/sbin/init rootwait\0" \
+	"bootmmc=setenv devnum 0;setenv partition 2;setenv bootargs \"console=ttyFIQ0,1500000n8 rw root=/dev/mmcblk${devnum}p${partition} rootfstype=ext4 init=/sbin/init rootwait\0" \
+	"emmccp512=mmc dev 0;mmc read 1000000 8000 100000;mmc write 1000000 108000 100000\0" \
+	"emmccp256=mmc dev 0;mmc read 1000000 8000 80000;mmc write 1000000 88000 80000\0" \
+	"initroot=if test \"${rootfs}\" = \"init256\"; then run emmccp256;setenv rootfs;saveenv;exit;fi;if test \"${rootfs}\" = \"init512\"; then run emmccp512;setenv rootfs;saveenv; fi\0" \
+	"finddtb=if test \"${revision}\" != \"0\"; then setenv dtbfile \"${model}_r${revision}\";exit;fi;setenv dtbfile \"${model}\"\0"
 	
 #else
 #define BOOTENV \

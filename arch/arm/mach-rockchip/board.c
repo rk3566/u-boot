@@ -366,7 +366,9 @@ static void cmdline_handle(void)
 			env_update("bootargs", "usbfwupdate");
 	}
 }
+#define MODEL_SD_200	0
 #define MODEL_SS_200	1180
+#define MODEL_SD_2000	1782
 #define REVISION_0	511
 int adc(int ch)
 {
@@ -409,9 +411,12 @@ int board_late_init(void)
 #endif
 
 	// smiles77
+	
+
 	int adc_model = adc(2) * 100 / 1024 * 18;
+	int adc_moduleRevision = adc(1) * 100 / 1024 * 18;
 	int adc_revision = adc(0) * 100 / 1024 * 18;
-	//printf("adc %d %d\n", adc_model, adc_revision);
+	printf("adc model:%d revision:%d SOM Ver:%d\n", adc_model, adc_revision, adc_moduleRevision);
 
 	char *old_model= env_get("model");
 	int old_revision = env_get_ulong("revision",10, 10);
@@ -422,8 +427,21 @@ int board_late_init(void)
 	int new_revision = 0;
 	int needSave = 0;
 	
-	if(adc_model > MODEL_SS_200 - 100 && adc_model < MODEL_SS_200+100) {	// SS-200
+	char *cpu= env_get("cpu");
+	if(strcmp(cpu, "rk3566")){
+		needSave = 1;
+		env_set("cpu", "rk3566");
+	}
+
+
+	if(adc_model > MODEL_SS_200 - 50 && adc_model < MODEL_SS_200+50) {	// SS-200
 		new_model = "SS-200";
+	}else if(adc_model > MODEL_SD_2000 -50 && adc_model < MODEL_SD_2000+50) {	// SD-2000
+		new_model = "SD-2000";
+	}else if(adc_model < MODEL_SD_200+50 ) {	// SD-200
+		new_model = "SD-200";
+	}else{
+		new_model = "unknown";
 	}
 
 	if(strcmp(new_model, old_model)){
@@ -498,14 +516,42 @@ static void board_mtd_blk_map_partitions(void)
 }
 #endif
 
+#define MODIFY_TWO_BITS(REG_ADDR, POS, VALUE) \
+    (*(volatile uint32_t *)(REG_ADDR) = (*(volatile uint32_t *)(REG_ADDR) & ~(0b11 << (POS))) | ((VALUE & 0b11) << (POS)))
+
+void modify_two_bits(volatile uint32_t r, int pos, uint8_t value) {
+	// 두 비트를 0으로 초기화한 후, 새로운 값을 설정
+	uintptr_t reg = r;
+	uint32_t regValue = *(volatile uint32_t *)(reg);
+	printf("%x before:%x\n", r, regValue);
+	regValue = regValue | 0b11 <<(16+pos);
+	regValue = regValue & ~(0b11 << (pos));
+	regValue = regValue | ((value & 0x11) << pos);
+	*(volatile uint32_t *)(reg) = regValue;
+	printf("%x after:%x\n", r, regValue);
+
+}
 
 
 int board_init(void)
 {
 	board_debug_init();
 
-	*((volatile int *)0xfdc600b0) = 0x0c000400;	// smiles77 usb power ctrl pull up 하단
-	*((volatile int *)0xfdc600b4) = 0xc0004000;	// smiles77 usb power ctrl pull up 상단
+	// manaul 275p
+	// 기본 USB HOST사용, 강제로 PULL UP시킴
+//	*((volatile int *)0xfdc600b0) = 0x0c000400;	// 4,a5 Bsmiles77 usb power ctrl pull up 하단
+//	*((volatile int *)0xfdc600b4) = 0xc0004000;	// 4,b7 smiles77 usb power ctrl pull up 상단
+
+	// SD-2000은 주석처리함 기본 USB HOST POWER OFF 사용, 기본이 pull-down이여서 코드가 필요없음
+ //	*((volatile int *)0xfdc600b0) = 0x0c000800;	// 4,a5 Bsmiles77 usb power ctrl pull up 하단
+//	*((volatile int *)0xfdc600b4) = 0xc0004000;	// 4,b7 smiles77 usb power ctrl pull up 상단
+//
+//	*((volatile int *)0xfdc600ac) = 0xc0004000;	// 4,b7 smiles77 usb power ctrl pull up 상단
+
+	modify_two_bits(0xfdc600ac, 12, 1);	// uart1 tx pull up g3c6	p.274 
+	modify_two_bits(0xfdc60080, 4, 1);	// uart3 tx pull up g1a1	p.265
+	modify_two_bits(0xfdc600a8, 4, 1);	// uart5 tx pull up g3c2	p.274
+	modify_two_bits(0xfdc600b0, 4, 1);	// uart7 tx pull up g4a2	p.276
 	
 #ifdef DEBUG
 	soc_clk_dump();

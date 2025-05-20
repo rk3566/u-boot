@@ -1,0 +1,1 @@
+arch/arm/mach-rockchip/board.c
